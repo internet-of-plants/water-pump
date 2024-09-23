@@ -34,11 +34,12 @@ public:
     }
 
     auto actIfNeeded() noexcept -> bool {
-        const auto now = iop_hal::Moment::now();
+        auto now = iop_hal::Moment::now();
+        now.setSecond(0);
 
         if (!this->next) {
           for (const auto & [moment, _]: this->states) {
-            if (moment > now && (!this->next || this->next > moment)) {
+            if (moment >= now && (!this->next || this->next > moment)) {
               this->next = moment;
             }
           }
