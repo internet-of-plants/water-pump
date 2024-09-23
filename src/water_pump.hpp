@@ -33,7 +33,23 @@ public:
         this->relay.setHighFor(time);
     }
 
-    auto actIfNeeded() noexcept -> bool;
+    auto actIfNeeded() noexcept -> bool {
+        if (!this->next) return false;
+        if (Moment::now() < this->next) return false;
+
+        std::optional<Moment> next;
+        for (const auto & [moment, time]: this->states) {
+            if (this->next == moment) {
+                this->turnOnFor(time);
+            }
+            if (moment > *this->next && (!next || moment < *next)) {
+                next = moment;
+            }
+        }
+        this->next = next;
+
+        return true;
+    }
 };
 }
 
