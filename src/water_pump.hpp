@@ -25,10 +25,6 @@ public:
     }
 
     auto setTime(const iop_hal::Moment moment, const iop::time::seconds time) noexcept -> void {
-        if (!this->next || *this->next > moment) {
-            this->next = moment;
-        }
-
         this->states.insert_or_assign(moment, time);
     }
 
@@ -38,9 +34,19 @@ public:
     }
 
     auto actIfNeeded() noexcept -> bool {
-        if (!this->next) return false;
-
         const auto now = iop_hal::Moment::now();
+
+        if (!this->next) {
+          for (const auto & [moment, _]: this->states) {
+            if (now < moment) {
+              this->next = moment;
+              break;
+            }
+          }
+
+          if (!this->next) return false;
+        }
+
         if (now < this->next && !(this->current && this->isNextTomorrow && now < this->current)) return false;
         this->current = now;
         this->isNextTomorrow = false;
