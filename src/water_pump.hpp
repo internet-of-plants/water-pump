@@ -25,7 +25,7 @@ public:
     }
 
     auto setTime(const Moment moment, const iop::time::seconds time) noexcept -> void {
-        if (Moment::now() < moment && (!this->next || *this->next > moment)) {
+        if (!this->next || *this->next > moment) {
             this->next = moment;
         }
 
