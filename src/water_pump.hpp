@@ -31,6 +31,7 @@ public:
     auto turnOnFor(const iop::time::seconds time) const noexcept -> void {
         Serial.println("ONNNNNN");
         this->relay.setHighFor(time);
+        Serial.println("OFFFFFF");
     }
 
     auto actIfNeeded() noexcept -> bool {
