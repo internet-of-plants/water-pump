@@ -7,9 +7,9 @@
 namespace relay {
 class WaterPump {
     relay::Relay relay;
-    std::unordered_map<Moment, iop::time::seconds> states;
-    std::optional<Moment> current;
-    std::optional<Moment> next;
+    std::unordered_map<iop_hal::Moment, iop::time::seconds> states;
+    std::optional<iop_hal::Moment> current;
+    std::optional<iop_hal::Moment> next;
     bool isNextTomorrow;
 public:
     WaterPump(const iop_hal::PinRaw pin) noexcept: relay(pin) {}
@@ -24,7 +24,7 @@ public:
         this->next = std::nullopt;
     }
 
-    auto setTime(const Moment moment, const iop::time::seconds time) noexcept -> void {
+    auto setTime(const iop_hal::Moment moment, const iop::time::seconds time) noexcept -> void {
         if (!this->next || *this->next > moment) {
             this->next = moment;
         }
@@ -33,20 +33,21 @@ public:
     }
 
     auto turnOnFor(const iop::time::seconds time) const noexcept -> void {
+        Serial.println("ONNNNNN");
         this->relay.setHighFor(time);
     }
 
     auto actIfNeeded() noexcept -> bool {
         if (!this->next) return false;
 
-        const auto now = Moment::now();
+        const auto now = iop_hal::Moment::now();
         if (now < this->next && !(this->current && this->isNextTomorrow && now < this->current)) return false;
         this->current = now;
         this->isNextTomorrow = false;
 
         bool found;
-        std::optional<Moment> next;
-        std::optional<Moment> first;
+        std::optional<iop_hal::Moment> next;
+        std::optional<iop_hal::Moment> first;
         for (const auto & [moment, time]: this->states) {
             if (!first) first = moment;
 
