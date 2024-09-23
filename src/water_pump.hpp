@@ -38,9 +38,8 @@ public:
 
         if (!this->next) {
           for (const auto & [moment, _]: this->states) {
-            if (now < moment) {
+            if (moment > now && (!this->next || this->next > moment)) {
               this->next = moment;
-              break;
             }
           }
 
@@ -51,23 +50,20 @@ public:
         this->current = now;
         this->isNextTomorrow = false;
 
-        bool found;
         std::optional<iop_hal::Moment> next;
-        std::optional<iop_hal::Moment> first;
+        std::optional<iop_hal::Moment> earliest;
         for (const auto & [moment, time]: this->states) {
-            if (!first) first = moment;
+            if (!earliest || earliest > moment) earliest = moment;
 
-            if (found) {
+            if (moment > now && (!next || next > moment)) {
                 next = moment;
-                break;
             } else if (this->next == moment) {
                 this->turnOnFor(time);
-                found = true;
             }
         }
 
-        if (!next.has_value() && first) {
-            next = first;
+        if (!next && earliest) {
+            next = earliest;
             this->isNextTomorrow = true;
         }
         this->next = next;
